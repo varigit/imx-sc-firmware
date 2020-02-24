@@ -1,0 +1,72 @@
+
+SOC = MX8QM
+
+DRV += 			\
+	analog		\
+	csr 		\
+	dsc 		\
+	pad		\
+	sysctr 		\
+	xrdc2		\
+	mtr
+
+DRV2 += 		\
+	gpio		\
+    igpio       \
+	lmem		\
+	lpi2c		\
+	lpit 		\
+	lpcg 		\
+	lpuart 		\
+	mu			\
+	otp			\
+	stc			\
+	systick 	\
+	drc			\
+	wdog32
+
+ifeq ($(UPPER_R),A0)
+	SS += 	sc/v1 		\
+			vpu/v1 		\
+			lsio/v1
+	DRV +=  seco/v1
+	DRV2 += snvs/v1
+else
+	SS += 	sc/v2 		\
+			vpu/v3 		\
+			lsio/v2
+	DRV +=  seco/v2
+	DRV2 += snvs/v2
+endif
+
+SS += 			\
+	a53/v1 		\
+	a72/v1 		\
+	audio/v1	\
+	base 		\
+	cci/v1 		\
+	conn/v1 	\
+	csi/v1 		\
+	db/v1		\
+	dblogic/v1 	\
+	dc/v1 		\
+	dma/v1		\
+	drc/v1 		\
+	gpu/v1 		\
+	hdmi/v1		\
+	hdmi_rx/v1	\
+	hsio/v1		\
+	img/v1		\
+	lvds/v1		\
+	m4/v1 		\
+	mipi/v1
+
+SVC += 			\
+	irq 		\
+	misc 		\
+	pad 		\
+	pm 			\
+	rm 			\
+	seco		\
+	timer
+

@@ -1,0 +1,57 @@
+
+SOC = MX8DM
+
+DRV += 			\
+	analog		\
+	csr 		\
+	dsc 		\
+	pad			\
+	seco/v2 	\
+	sysctr 		\
+	xrdc2		\
+	mtr
+
+DRV2 += 		\
+	gpio		\
+    igpio       \
+	lmem		\
+	lpi2c		\
+	lpit 		\
+	lpcg 		\
+	lpuart 		\
+	mu			\
+	otp			\
+	snvs/v2		\
+	stc			\
+	systick 	\
+	drc			\
+	wdog32
+
+SS += 			\
+	a72/v1 		\
+	adma/v2		\
+	base 		\
+	conn/v1 	\
+	csi/v1 		\
+	db/v3		\
+	dc/v1 		\
+	drc/v1 		\
+	gpu/v1 		\
+	hdmi/v1		\
+	hslsio/v1	\
+	img/v1		\
+	lvds/v1		\
+	m4/v1 		\
+	mipi/v2		\
+	sc/v2 		\
+	vpu/v5
+
+SVC += 			\
+	irq 		\
+	misc 		\
+	pad 		\
+	pm 			\
+	rm 			\
+	seco		\
+	timer
+

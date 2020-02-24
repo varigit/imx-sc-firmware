@@ -1,0 +1,6 @@
+
+DRV2 +=                 \
+        pmic            \
+        pmic/pf100      \
+        pmic/pf8100
+
