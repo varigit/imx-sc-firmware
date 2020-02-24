@@ -1,0 +1,19 @@
+# Ignore miscellaneous files
+cscope.*
+*.swp
+*.patch
+*~
+.project
+.cproject
+
+# Ignore build directories
+scfw_export_mx8qx_b0/build_mx8qx_b0
+scfw_export_mx8qx_b0/platform/board/mx8qx_var_som/dcd/*.h
+scfw_export_mx8qm_b0/build_mx8qm_b0
+scfw_export_mx8qm_b0/platform/board/mx8qm_var_som/dcd/*.h
+
+# GNU GLOBAL files
+GPATH
+GRTAGS
+GSYMS
+GTAGS
