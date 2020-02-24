@@ -72,6 +72,7 @@
 #include "pads.h"
 #include "drivers/pad/fsl_pad.h"
 #include "dcd/dcd_retention.h"
+#include "eeprom.h"
 
 /* Local Defines */
 
@@ -1893,19 +1894,87 @@ void board_tick(uint16_t msec)
 /*--------------------------------------------------------------------------*/
 /* Board IOCTL function                                                     */
 /*--------------------------------------------------------------------------*/
-sc_err_t board_ioctl(sc_rm_pt_t caller_pt, sc_rsrc_t mu, uint32_t *parm1,
-    uint32_t *parm2, uint32_t *parm3)
+sc_err_t board_ioctl(sc_rm_pt_t caller_pt, sc_rsrc_t mu, uint32_t *command,
+    uint32_t *p1, uint32_t *p2)
 {
+    int i;
     sc_err_t err = SC_ERR_PARM;
+    uint8_t *buff = (uint8_t *)*p1;
+    uint32_t size = *p2;
+    uint32_t i2c_addr = EEPROM_I2C_ADDRESS;
+
+    always_print("IOCTL Function called! Cmd is %d, Buffer Addr is 0x%08x, Size is 0x%08x\n",
+			*command, *p1, *p2);
 
     /* For test_misc */
-    if (*parm1 == 0xFFFFFFFEU)
-    {
-        *parm1 = *parm2 + *parm3;
-        *parm2 = mu;
-        *parm3 = caller_pt;
+    switch (*command) {
 
-        err = SC_ERR_NONE;
+	case SOMINFO_READ_EEPROM:
+		always_print("EEPROM Read Function called, address=0x%08x!\n", buff);
+		if (size > 0x100) {
+			if (eeprom_i2c_read(i2c_addr, 0x0, buff, 0x100)) {
+				always_print("EEPROM Read FAIL!\n");
+				break;
+			}
+			SystemTimeDelay(20000U);
+			size -= 0x100;
+			buff += 0x100;
+			++i2c_addr;
+		}
+		if (eeprom_i2c_read(i2c_addr, 0x0, buff, size)) {
+			always_print("EEPROM Read FAIL!\n");
+			break;
+		}
+		SystemTimeDelay(20000U);
+		always_print("EEPROM Read Success!\n");
+		err = SC_ERR_NONE;
+		break;
+
+	case SOMINFO_WRITE_EEPROM:
+		always_print("EEPROM Write Function called, address=0x%08x!\n", buff);
+		for (i = 0; i < 16; i++)
+			always_print("data[%d]=0x%x\n", i, buff[i]);
+		i = 0;
+		if (eeprom_i2c_write(EEPROM_I2C_ADDRESS, 0x00, &i, 0x02)) {
+			always_print("EEPROM Magic Erase FAIL!\n");
+			break;
+		}
+
+		SystemTimeDelay(20000U);
+
+		if (eeprom_i2c_write(EEPROM_I2C_ADDRESS, 0x02, buff+0x02, 14)) {
+			always_print("EEPROM Write block 0 FAIL!\n");
+			break;
+		}
+
+		for (i = 1; i < 16; i++) {
+			SystemTimeDelay(20000U);
+			if (eeprom_i2c_write(EEPROM_I2C_ADDRESS, i*16, buff+i*16, 16)) {
+				always_print("EEPROM Write block %d FAIL!\n",i);
+				break;
+			}
+		}
+
+		for (i = 0; i < 16; i++) {
+			SystemTimeDelay(20000U);
+			if (eeprom_i2c_write(EEPROM_I2C_ADDRESS+1, i*16, buff+256+i*16, 16)) {
+				always_print("EEPROM Write block %d FAIL!\n",i+16);
+				break;
+			}
+		}
+
+		SystemTimeDelay(20000U);
+
+		if (eeprom_i2c_write(EEPROM_I2C_ADDRESS, 0x00, buff, 0x02)) {
+			always_print("EEPROM Magic Write FAIL!\n");
+			break;
+		}
+
+		always_print("EEPROM Write Success!\n");
+		err = SC_ERR_NONE;
+		break;
+	default:
+		always_print("Unknown command ID!\n");
     }
 
     return err;
