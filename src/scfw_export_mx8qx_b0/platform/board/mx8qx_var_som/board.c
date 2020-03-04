@@ -72,7 +72,9 @@
 #include "drivers/pad/fsl_pad.h"
 #include "dcd/dcd_retention.h"
 #include "drivers/systick/fsl_systick.h"
+
 #include "eeprom.h"
+#include "ddr_table.h"
 
 /* Local Defines */
 
@@ -575,6 +577,113 @@ sc_err_t board_init_ddr(sc_bool_t early, sc_bool_t ddr_initialized)
 /*--------------------------------------------------------------------------*/
 /* Take action on DDR                                                       */
 /*--------------------------------------------------------------------------*/
+
+/*
+ * Modify DCD table based on the adjustment table in EEPROM
+ *
+ * Assumption: register addresses in the adjustment table
+ * follow the order of register addresses in the original table
+ *
+ * @adj_table_offset - offset of adjustment table from start of EEPROM
+ * @adj_table_size   - number of rows in adjustment table
+ * @table            - pointer to DDR table
+ * @table_size       - number of rows in DDR table
+ */
+static void adjust_dcd_table(struct dram_cfg_param *table, uint8_t table_size)
+{
+	int i, j = 0;
+	uint8_t off;
+	uint8_t adj_table_size;
+	status_t err;
+	struct var_eeprom e;
+	struct dram_cfg_param adj_table_row;
+
+	/* Initialize EEPROM I2C bus */
+	eeprom_i2c_init();
+
+	/* Read EEPROM header */
+	err = eeprom_i2c_read(EEPROM_I2C_ADDRESS, 0, (uint8_t *)&e, sizeof(e));
+	if (err != I32(kStatus_Success)) {
+		board_print(3, "EEPROM read failed, err=%d\n", err);
+		return;
+	}
+
+	/* Check EEPROM validity */
+	if (!var_eeprom_is_valid(&e))
+		return;
+
+	/* Check EEPROM version - only version 4+ has DDR adjustment table */
+	if (e.version < 4) {
+		board_print(3, "EEPROM version is %d\n", e.version);
+		return;
+	}
+
+	/* Calculate DRAM adjustment table size */
+	adj_table_size = (e.off[1] - e.off[0]) / (sizeof(struct dram_cfg_param));
+	board_print(3, "Adjustment table size is %d\n", adj_table_size);
+
+	/* Iterate over the adjustment table */
+	off = e.off[0];
+	for (i = 0; i < adj_table_size; i++) {
+
+		/* Read next entry from the adjustment table */
+		eeprom_i2c_read(EEPROM_I2C_ADDRESS, off,
+				(uint8_t *)&adj_table_row, sizeof(adj_table_row));
+
+		/* Iterate over the DCD table and adjust it */
+		for (; j < table_size; j++) {
+			if ((table[j].cmd == adj_table_row.cmd) &&
+			    (table[j].reg == adj_table_row.reg)) {
+				board_print(3, "Adjusting: cmd=0x%x reg=0x%x val=0x%x\n",
+					adj_table_row.cmd, adj_table_row.reg, adj_table_row.val);
+				table[j].val = adj_table_row.val;
+				break;
+			}
+		}
+
+		off += sizeof(adj_table_row);
+	}
+
+	board_print(3, "Done adjusting DCD table\n");
+}
+
+static void board_dcd_config(void)
+{
+	uint8_t i;
+
+	adjust_dcd_table(dcd_table, dcd_table_size);
+
+	for (i = 0; i < dcd_table_size; i++) {
+		struct dram_cfg_param *p = &dcd_table[i];
+
+		switch (p->cmd) {
+			case DCD_WRITE:
+				DATA4(p->reg, p->val);
+				break;
+			case DCD_SET_BIT:
+				SET_BIT4(p->reg, p->val);
+				break;
+			case DCD_CLR_BIT:
+				CLR_BIT4(p->reg, p->val);
+				break;
+			case DCD_CHECK_BITS_SET:
+				CHECK_BITS_SET4(p->reg, p->val);
+				break;
+			case DCD_CHECK_BITS_CLR:
+				CHECK_BITS_CLR4(p->reg, p->val);
+				break;
+			case DCD_CHECK_ANY_BIT_SET:
+				CHECK_ANY_BIT_SET4(p->reg, p->val);
+				break;
+			case DCD_CHECK_ANY_BIT_CLR:
+				CHECK_ANY_BIT_CLR4(p->reg, p->val);
+				break;
+			default:
+				break;
+		}
+	}
+}
+
 sc_err_t  board_ddr_config(bool rom_caller, board_ddr_action_t action)
 {
     /* Note this is called by the ROM before the SCFW is initialized.
@@ -667,7 +776,7 @@ sc_err_t  board_ddr_config(bool rom_caller, board_ddr_action_t action)
             break;
     #endif
         default:
-            #include "dcd/dcd.h"
+            board_dcd_config();
             break;
     }
 

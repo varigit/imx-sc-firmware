@@ -7,7 +7,8 @@ endif
 
 OBJS += $(OUT)/board/mx8qx_$(B)/board.o \
 		$(OUT)/board/board_common.o \
-		$(OUT)/board/mx8qx_$(B)/eeprom.o
+		$(OUT)/board/mx8qx_$(B)/eeprom.o \
+		$(OUT)/board/mx8qx_$(B)/ddr_table.o \
 
 ifneq ($(HW), SIMU)
     OBJS += $(OUT)/board/board.o
