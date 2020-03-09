@@ -76,6 +76,15 @@
 
 /* Local Defines */
 
+#undef M40_USES_UART4 /* suggested for VAR-SOM-MX8 only */
+#undef M41_USES_UART2
+#undef M41_USES_SPI0
+#undef M41_USES_I2C0
+#undef M41_USES_GPIO3_06
+#undef M41_USES_EDMA
+#undef M41_USES_CAN0
+#undef M41_USES_ADC6
+
 /*!
  * @name Board Configuration
  * DO NOT CHANGE - must match object code.
@@ -677,6 +686,11 @@ sc_err_t board_system_config(sc_bool_t early, sc_rm_pt_t pt_boot)
             SC_R_MU_8B, SC_TRUE));
         BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_GPT_4,
             SC_R_GPT_4, SC_TRUE));
+#ifdef M40_USES_UART4
+        /* Move UART4 resource to the M4_0 subsystem using M4_0 pads */
+        BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_UART_4,
+            SC_R_UART_4, SC_TRUE));
+#endif
 
         /* Move everything flagged as movable */
         BRD_ERR(rm_move_all(pt_boot, pt_boot, pt_m4_0, SC_TRUE, SC_TRUE));
@@ -721,10 +735,54 @@ sc_err_t board_system_config(sc_bool_t early, sc_rm_pt_t pt_boot)
             SC_R_MU_9B, SC_TRUE));
         BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_GPT_3,
             SC_R_GPT_3, SC_TRUE));
+#ifdef M41_USES_UART2
+        BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_DMA_0_CH16,
+            SC_R_DMA_0_CH17, SC_TRUE)); /* DMA0 channels for UART2 */
+        BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_UART_2,
+            SC_R_UART_2, SC_TRUE));
+        BRD_ERR(rm_set_pad_movable(pt_boot, SC_P_LVDS0_I2C1_SCL,
+            SC_P_LVDS0_I2C1_SDA, SC_TRUE));
+#endif
+#ifdef M41_USES_SPI0
+        BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_DMA_0_CH0,
+            SC_R_DMA_0_CH1, SC_TRUE)); /* DMA0 channels for SPI0 */
+        BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_SPI_0,
+            SC_R_SPI_0, SC_TRUE));
+        BRD_ERR(rm_set_pad_movable(pt_boot, SC_P_SPI0_SCK,
+            SC_P_SPI0_CS0, SC_TRUE));
+#endif
+#ifdef M41_USES_I2C0
+        BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_DMA_1_CH0,
+            SC_R_DMA_1_CH1, SC_TRUE)); /* DMA1 channels for I2C0 */
+        BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_I2C_0,
+            SC_R_I2C_0, SC_TRUE));
+        BRD_ERR(rm_set_pad_movable(pt_boot, SC_P_HDMI_TX0_TS_SCL,
+            SC_P_HDMI_TX0_TS_SDA, SC_TRUE));
+#endif
+#ifdef M41_USES_GPIO3_06
+        BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_GPIO_3,
+            SC_R_GPIO_3, SC_TRUE));
+        BRD_ERR(rm_set_pad_movable(pt_boot, SC_P_SPI0_CS1,
+            SC_P_SPI0_CS1, SC_TRUE));
+#endif
+#ifdef M41_USES_EDMA
+        BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_DMA_0_CH30,
+            SC_R_DMA_0_CH30, SC_TRUE)); /* DMA0 channel for EDMA sample code */
+#endif
+#ifdef M41_USES_CAN0
+        BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_DMA_1_CH26,
+            SC_R_DMA_1_CH26, SC_TRUE)); /* DMA1 channel for CAN0 sample code */
         BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_CAN_0,
-            SC_R_CAN_2, SC_TRUE));
-        BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_FSPI_0,
-            SC_R_FSPI_0, SC_TRUE));
+            SC_R_CAN_0, SC_TRUE));
+        BRD_ERR(rm_set_pad_movable(pt_boot, SC_P_FLEXCAN0_RX,
+            SC_P_FLEXCAN0_TX, SC_TRUE));
+#endif
+#ifdef M41_USES_ADC6
+        BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_ADC_1,
+            SC_R_ADC_1, SC_TRUE));
+        BRD_ERR(rm_set_pad_movable(pt_boot, SC_P_ADC_IN6,
+            SC_P_ADC_IN6, SC_TRUE));
+#endif
 
         /* Move some pads not in the M4_1 subsystem */
         BRD_ERR(rm_set_pad_movable(pt_boot, SC_P_FLEXCAN0_RX,
