@@ -13,6 +13,40 @@
 /* Local Variables */
 
 /*--------------------------------------------------------------------------*/
+/* Initialize EEPROM I2C bus                                                */
+/*--------------------------------------------------------------------------*/
+void eeprom_i2c_init(void)
+{
+            sc_pm_clock_rate_t rate = SC_24MHZ;
+            static lpi2c_master_config_t lpi2c_masterConfig;
+
+            /* Power up the I2C and configure clocks */
+            pm_force_resource_power_mode_v(SC_R_SC_I2C,
+                SC_PM_PW_MODE_ON);
+            (void) pm_set_clock_rate(SC_PT, SC_R_SC_I2C,
+                SC_PM_CLK_PER, &rate);
+            (void) pm_force_clock_enable(SC_R_SC_I2C, SC_PM_CLK_PER,
+                SC_TRUE);
+
+            /* Initialize the pads used to communicate with the EEPROM */
+            pad_force_mux(SC_P_PMIC_I2C_SDA, 0,
+                SC_PAD_CONFIG_OD_IN, SC_PAD_ISO_OFF);
+            (void) pad_set_gp_28fdsoi(SC_PT, SC_P_PMIC_I2C_SDA,
+                SC_PAD_28FDSOI_DSE_18V_1MA, SC_PAD_28FDSOI_PS_PU);
+            pad_force_mux(SC_P_PMIC_I2C_SCL, 0,
+                SC_PAD_CONFIG_OD_IN, SC_PAD_ISO_OFF);
+            (void) pad_set_gp_28fdsoi(SC_PT, SC_P_PMIC_I2C_SCL,
+                SC_PAD_28FDSOI_DSE_18V_1MA, SC_PAD_28FDSOI_PS_PU);
+
+            /* Initialize the I2C used to communicate with the PMIC */
+            LPI2C_MasterGetDefaultConfig(&lpi2c_masterConfig);
+            LPI2C_MasterInit(LPI2C_PMIC, &lpi2c_masterConfig, SC_24MHZ);
+
+            /* Delay to allow I2C to settle */
+            SystemTimeDelay(2U);
+}
+
+/*--------------------------------------------------------------------------*/
 /* Write to the EEPROM via the I2C                                            */
 /*--------------------------------------------------------------------------*/
 static status_t eeprom_i2c_write_sub(uint8_t device_addr, uint8_t reg, const void *data,
