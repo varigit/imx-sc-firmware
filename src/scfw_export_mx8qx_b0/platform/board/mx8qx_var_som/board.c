@@ -297,15 +297,37 @@ void board_config_debug_uart(sc_bool_t early_phase)
 {
     #if defined(ALT_DEBUG_SCU_UART) && !defined(DEBUG_TERM_EMUL) \
             && defined(DEBUG) && !defined(SIMU)
-        /* Power up UART */
-        pm_force_resource_power_mode_v(SC_R_SC_UART,
-            SC_PM_PW_MODE_ON);
+	if ((SCFW_DBG_READY == 0U) && (early_phase == SC_FALSE))
+	{
+		static sc_bool_t banner = SC_FALSE;
+		sc_pm_clock_rate_t rate = SC_24MHZ;
 
-        /* Check if debug disabled */
-        if (SCFW_DBG_READY == 0U)
-        {
-            main_config_debug_uart(LPUART_DEBUG, SC_24MHZ);
-        }
+		/* Configure pads */
+		pad_force_mux(SC_P_SCU_GPIO0_00, 1, SC_PAD_CONFIG_NORMAL,
+			SC_PAD_ISO_OFF);
+		pad_force_mux(SC_P_SCU_GPIO0_01, 1, SC_PAD_CONFIG_NORMAL,
+			SC_PAD_ISO_OFF);
+
+		/* Power up and enable clock */
+		pm_force_resource_power_mode_v(SC_R_SC_PID0, SC_PM_PW_MODE_ON);
+		pm_force_resource_power_mode_v(SC_R_DBLOGIC, SC_PM_PW_MODE_ON);
+		pm_force_resource_power_mode_v(SC_R_DB, SC_PM_PW_MODE_ON);
+		pm_force_resource_power_mode_v(SC_R_SC_UART, SC_PM_PW_MODE_ON);
+
+		(void) pm_set_clock_rate(SC_PT, SC_R_SC_UART, SC_PM_CLK_PER, &rate);
+		(void) pm_clock_enable(SC_PT, SC_R_SC_UART, SC_PM_CLK_PER, SC_TRUE, SC_FALSE);
+
+		/* Configure UART */
+		main_config_debug_uart(LPUART_DEBUG, rate);
+
+		if (banner == SC_FALSE)
+		{
+			debug_print(1,
+			"\nHello from SCU (Build %u, Commit %08x, %s %s)\n\n",
+			SCFW_BUILD, SCFW_COMMIT, SCFW_DATE, SCFW_TIME);
+			banner = SC_TRUE;
+		}
+	}
     #elif defined(ALT_DEBUG_UART) && defined(DEBUG) && !defined(SIMU)
         /* Use M4 UART if ALT_DEBUG_UART defined */
         /* Return if debug already enabled */
