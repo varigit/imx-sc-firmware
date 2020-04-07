@@ -1,0 +1,13 @@
+NXP Software Content Register
+
+--------------------------------------------
+
+Package:                   imx-scfw-porting-kit*.bin
+Outgoing License:          LA_OPT_NXP_Software_License - Production Use, Section 2.3 applies
+License File:              COPYING
+Type of content:           Binary
+Description and comments:  System Controller firmware
+Release Location:          NXP.com
+Origin:                    NXP (proprietary)
+                           Freescale Semiconductor, Inc. (proprietary)
+                           ARM CMSIS Library (BSD-3-clause) - https://silver.arm.com/

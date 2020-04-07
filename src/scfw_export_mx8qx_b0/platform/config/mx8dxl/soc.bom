@@ -1,0 +1,51 @@
+
+SOC = MX8DXL
+
+DRV +=          \
+    analog      \
+    csr         \
+    dsc         \
+    mtr         \
+    pad         \
+    reset       \
+    seco/v2     \
+    sysctr      \
+    xrdc2       \
+    v2x
+
+DRV2 +=         \
+    rgpio       \
+    igpio       \
+    lmem        \
+    lpi2c       \
+    lpit        \
+    lpcg        \
+    lpuart      \
+    mu          \
+    otp         \
+    snvs/v2     \
+    systick     \
+    drc         \
+    wdog32
+
+SS +=           \
+    a35/v2      \
+    adma/v3     \
+    base        \
+    conn/v2     \
+    db/v4       \
+    drc/v3      \
+    hsio/v2     \
+    lsio/v2     \
+    m4/v1       \
+    sc/v2
+
+SVC +=          \
+    irq         \
+    misc        \
+    pad         \
+    pm          \
+    rm          \
+    seco        \
+    timer
+
