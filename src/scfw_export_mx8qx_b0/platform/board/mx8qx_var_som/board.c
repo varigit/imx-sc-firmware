@@ -589,11 +589,11 @@ sc_err_t board_init_ddr(sc_bool_t early, sc_bool_t ddr_initialized)
  * @table            - pointer to DDR table
  * @table_size       - number of rows in DDR table
  */
-static void adjust_dcd_table(struct dram_cfg_param *table, uint8_t table_size)
+static void adjust_dcd_table(struct dram_cfg_param *table, int table_size)
 {
 	int i, j = 0;
-	uint8_t off;
-	uint8_t adj_table_size;
+	int off;
+	int adj_table_size;
 	status_t err;
 	struct var_eeprom e;
 	struct dram_cfg_param adj_table_row;
@@ -649,7 +649,7 @@ static void adjust_dcd_table(struct dram_cfg_param *table, uint8_t table_size)
 
 static void board_dcd_config(void)
 {
-	uint8_t i;
+	int i;
 
 	adjust_dcd_table(dcd_table, dcd_table_size);
 

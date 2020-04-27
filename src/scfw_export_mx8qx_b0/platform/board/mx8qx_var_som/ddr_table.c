@@ -171,4 +171,4 @@ struct dram_cfg_param dcd_table[] = {
 	{DCD_CHECK_BITS_SET, 0x5c000004U, 0x1U},
 };
 
-uint32_t dcd_table_size = ARRAY_SIZE(dcd_table);
+int dcd_table_size = ARRAY_SIZE(dcd_table);
