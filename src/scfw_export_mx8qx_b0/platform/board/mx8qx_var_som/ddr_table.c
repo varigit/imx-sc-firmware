@@ -188,4 +188,4 @@ struct dram_cfg_param dcd_table[] = {
 	{DCD_LPDDR4_DERATE_INIT, 0, 0},
 };
 
-uint32_t dcd_table_size = ARRAY_SIZE(dcd_table);
+int dcd_table_size = ARRAY_SIZE(dcd_table);

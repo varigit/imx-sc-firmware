@@ -18,5 +18,5 @@ struct __attribute__((packed)) dram_cfg_param {
 };
 
 extern struct dram_cfg_param dcd_table[];
-extern uint32_t dcd_table_size;
+extern int dcd_table_size;
 
