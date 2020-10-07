@@ -156,6 +156,7 @@ static void board_get_pmic_info(sc_sub_t ss, uint32_t *pmic_reg,
 
 static pmic_version_t pmic_ver;
 static uint32_t temp_alarm;
+static struct var_eeprom e = {0};
 
 /*!
  * This constant contains info to map resources to the board.
@@ -617,7 +618,6 @@ static void adjust_dcd_table(struct dram_cfg_param *table, int table_size)
 	int off;
 	int adj_table_size;
 	status_t err;
-	struct var_eeprom e;
 	struct dram_cfg_param adj_table_row;
 
 	/* Initialize EEPROM I2C bus */
@@ -814,6 +814,10 @@ sc_err_t  board_ddr_config(bool rom_caller, board_ddr_action_t action)
     return err;
 }
 
+#define LOW_MEM_MAX_DRAM_SIZE	0x80000000
+#define HIGH_MEM_START_ADDR	0x880000000ULL
+#define HIGH_MEM_END_ADDR	0xFFFFFFFFFULL
+#define DEFAULT_DRAM_SIZE	0x80000000
 /*--------------------------------------------------------------------------*/
 /* Configure the system (inc. additional resource partitions)               */
 /*--------------------------------------------------------------------------*/
@@ -840,10 +844,22 @@ void board_system_config(sc_bool_t early, sc_rm_pt_t pt_boot)
 
 #ifndef EMUL
     sc_rm_mr_t mr_temp;
+    sc_faddr_t mr_start;
+    sc_faddr_t dram_size;
 
-    /* Board has 3GB memory so fragment upper region and retain 1GB */
-    BRD_ERR(rm_memreg_frag(pt_boot, &mr_temp, 0x8C0000000ULL,
-        0xFFFFFFFFFULL));
+    /* Read DRAM size from the EEPROM, use 2GiB if EEPROM is not programmed */
+    if (!var_eeprom_is_valid(&e))
+        dram_size = DEFAULT_DRAM_SIZE;
+    else
+        dram_size = (e.dramsize * 128ULL) << 20;
+
+    /* Fragment upper region and retain (dram_size - LOW_MEM_MAX_DRAM_SIZE) */
+    if (dram_size > LOW_MEM_MAX_DRAM_SIZE)
+        mr_start = HIGH_MEM_START_ADDR + (dram_size - LOW_MEM_MAX_DRAM_SIZE);
+    else
+	mr_start = HIGH_MEM_START_ADDR;
+
+    BRD_ERR(rm_memreg_frag(pt_boot, &mr_temp, mr_start, HIGH_MEM_END_ADDR));
     BRD_ERR(rm_memreg_free(pt_boot, mr_temp));
 #endif
 
