@@ -2,6 +2,9 @@
 #define DRV_EEPROM_H
 
 #define EEPROM_I2C_ADDRESS	0x52
+#define EEPROM_SIZE		512
+#define EEPROM_PAGE_SIZE	256
+#define EEPROM_MAX_WRITE_SIZE	16
 
 #define CTL_CODE(function, method) ((4 << 16) | ((function) << 2) | (method))
 
