@@ -1,0 +1,57 @@
+
+SOC = MX8QX
+
+DRV +=          \
+    analog      \
+    csr         \
+    dsc         \
+    otp         \
+    pad         \
+    seco/v2     \
+    snvs/v2     \
+    sysctr      \
+    xrdc2       \
+    mtr
+
+DRV2 +=         \
+    rgpio       \
+    igpio       \
+    lmem        \
+    lpi2c       \
+    lpit        \
+    lpcg        \
+    lpuart      \
+    mu          \
+    stc         \
+    systick     \
+    drc         \
+    wdog32
+
+SS +=           \
+    a35/v1      \
+    adma/v2     \
+    base        \
+    conn/v1     \
+    csi/v1      \
+    db/v2       \
+    dc/v1       \
+    drc/v2      \
+    gpu/v2      \
+    hsio/v2     \
+    img/v1      \
+    lsio/v2     \
+    m4/v1       \
+    mipi/v2     \
+    pi/v1       \
+    sc/v2       \
+    vpu/v4
+
+SVC +=          \
+    irq         \
+    misc        \
+    pad         \
+    pm          \
+    rm          \
+    seco        \
+    timer
+
