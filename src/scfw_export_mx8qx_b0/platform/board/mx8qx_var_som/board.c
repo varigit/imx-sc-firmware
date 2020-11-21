@@ -76,7 +76,6 @@
 #include "dcd/dcd_retention.h"
 #include "drivers/systick/fsl_systick.h"
 #include "eeprom.h"
-#include "ddr_table.h"
 
 /* Local Defines */
 
