@@ -76,6 +76,7 @@
 #include "dcd/dcd_retention.h"
 #include "drivers/systick/fsl_systick.h"
 #include "eeprom.h"
+#include "ddr_table.h"
 
 /* Local Defines */
 
@@ -916,35 +917,26 @@ void board_system_config(sc_bool_t early, sc_rm_pt_t pt_boot)
 
     board_print(3, "board_system_config(%d, %d)\n", early, alt_config);
 
-    #if !defined(EMUL)
-        sc_faddr_t mr_start;
-        sc_faddr_t dram_size;
+#ifndef EMUL
+    sc_rm_mr_t mr_temp;
+    sc_faddr_t mr_start;
+    sc_faddr_t dram_size;
 
-        /* Read DRAM size from the EEPROM, use 2GiB if EEPROM is not programmed */
-        if (!var_eeprom_is_valid(&e))
-            dram_size = DEFAULT_DRAM_SIZE;
-        else
-            dram_size = (e.dramsize * 128ULL) << 20;
+    /* Read DRAM size from the EEPROM, use 2GiB if EEPROM is not programmed */
+    if (!var_eeprom_is_valid(&e))
+        dram_size = DEFAULT_DRAM_SIZE;
+    else
+        dram_size = (e.dramsize * 128ULL) << 20;
 
-        /* Fragment upper region and retain (dram_size - LOW_MEM_MAX_DRAM_SIZE) */
-        if (dram_size > LOW_MEM_MAX_DRAM_SIZE)
-            mr_start = HIGH_MEM_START_ADDR + (dram_size - LOW_MEM_MAX_DRAM_SIZE);
-        else
-	    mr_start = HIGH_MEM_START_ADDR;
+    /* Fragment upper region and retain (dram_size - LOW_MEM_MAX_DRAM_SIZE) */
+    if (dram_size > LOW_MEM_MAX_DRAM_SIZE)
+        mr_start = HIGH_MEM_START_ADDR + (dram_size - LOW_MEM_MAX_DRAM_SIZE);
+    else
+	mr_start = HIGH_MEM_START_ADDR;
 
-        if (ddrtest == SC_FALSE)
-        {
-            sc_rm_mr_t mr_temp;
-
-            BRD_ERR(rm_memreg_frag(pt_boot, &mr_temp, mr_start, HIGH_MEM_END_ADDR));
-            BRD_ERR(rm_memreg_free(pt_boot, mr_temp));
-        }
-    #endif
-
-    /* Name default partitions */
-    PARTITION_NAME(SC_PT, "SCU");
-    PARTITION_NAME(SECO_PT, "SECO");
-    PARTITION_NAME(pt_boot, "BOOT");
+    BRD_ERR(rm_memreg_frag(pt_boot, &mr_temp, mr_start, HIGH_MEM_END_ADDR));
+    BRD_ERR(rm_memreg_free(pt_boot, mr_temp));
+#endif
 
     /* Configure initial resource allocation (note additional allocation
        and assignments can be made by the SCFW clients at run-time */
