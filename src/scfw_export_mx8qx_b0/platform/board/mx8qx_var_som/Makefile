@@ -38,6 +38,7 @@ else
 endif
 
 OBJS += $(OUT)/board/mx8qx_$(B)/board.o \
+		$(OUT)/board/mx8qx_$(B)/eeprom.o \
 		$(OUT)/board/board_common.o
 
 ifneq ($(HW), SIMU)

@@ -74,6 +74,7 @@
 #include "drivers/pad/fsl_pad.h"
 #include "dcd/dcd_retention.h"
 #include "drivers/systick/fsl_systick.h"
+#include "eeprom.h"
 
 /* Local Defines */
 
@@ -1609,24 +1610,107 @@ void board_tick(uint16_t msec)
 /*--------------------------------------------------------------------------*/
 /* Board IOCTL function                                                     */
 /*--------------------------------------------------------------------------*/
-sc_err_t board_ioctl(sc_rm_pt_t caller_pt, sc_rsrc_t mu, uint32_t *parm1,
-    uint32_t *parm2, uint32_t *parm3)
+sc_err_t board_ioctl(sc_rm_pt_t caller_pt, sc_rsrc_t mu, uint32_t *command,
+	uint32_t *p1, uint32_t *p2)
 {
-    sc_err_t err = SC_ERR_NONE;
+	int i;
+	sc_err_t err = SC_ERR_PARM;
+	uint8_t *buff = (uint8_t *)*p1;
+	uint32_t size = *p2;
+	uint32_t i2c_addr = EEPROM_I2C_ADDRESS;
+	uint32_t n_read, n_written, offset, len;
 
-    /* For test_misc */
-    if (*parm1 == 0xFFFFFFFEU)
-    {
-        *parm1 = *parm2 + *parm3;
-        *parm2 = mu;
-        *parm3 = caller_pt;
-    }
-    else
-    {
-        err = SC_ERR_PARM;
-    }
+	always_print("IOCTL Function called! Cmd is %d, Buffer Addr is 0x%08x, Size is 0x%08x\n",
+			*command, *p1, *p2);
 
-    return err;
+	if (size > EEPROM_SIZE) {
+		always_print("IOCTL: invalid size %u\n", size);
+		return SC_ERR_PARM;
+	}
+
+	switch (*command) {
+
+	case SOMINFO_READ_EEPROM:
+		always_print("EEPROM Read Function called, address=0x%08x!\n", buff);
+
+		offset = 0;
+		n_read = 0;
+
+		while (n_read < size) {
+
+			/* Calculate read size */
+			len = MIN(size - n_read, EEPROM_PAGE_SIZE);
+
+			/* Moving from low to high EEPROM page, change I2C address and offset */
+			offset = n_read;
+			if (n_read >= EEPROM_PAGE_SIZE) {
+				offset = n_read - EEPROM_PAGE_SIZE;
+				i2c_addr = EEPROM_I2C_ADDRESS + 1;
+			}
+
+			/* Perform read */
+			err = eeprom_i2c_read(i2c_addr, offset, buff, len);
+			if (err) {
+				always_print("EEPROM read failed!\n");
+				return err;
+			}
+
+			/* Wait for data to settle */
+			SystemTimeDelay(20000U);
+
+			/* Advance buffer pointer and number of bytes read */
+			buff += len;
+			n_read += len;
+		}
+
+		always_print("EEPROM Read Success!\n");
+		err = SC_ERR_NONE;
+		break;
+
+	case SOMINFO_WRITE_EEPROM:
+		always_print("EEPROM Write Function called, address=0x%08x!\n", buff);
+		for (i = 0; i < 16; i++)
+			always_print("data[%d]=0x%x\n", i, buff[i]);
+
+		offset = 0;
+		n_written = 0;
+
+		while (n_written < size) {
+
+			/* Calculate write size: no more than EEPROM_MAX_WRITE_SIZE */
+			len = MIN(size - n_written, EEPROM_MAX_WRITE_SIZE);
+
+			/* Moving from low to high EEPROM page, change I2C address and offset */
+			offset = n_written;
+			if (n_written >= EEPROM_PAGE_SIZE) {
+				offset = n_written - EEPROM_PAGE_SIZE;
+				i2c_addr = EEPROM_I2C_ADDRESS + 1;
+			}
+
+			/* Perform write */
+			err = eeprom_i2c_write(i2c_addr, offset, buff, len);
+			if (err) {
+				always_print("EEPROM write failed!\n");
+				return err;
+			}
+
+			/* Wait for data to settle */
+			SystemTimeDelay(20000U);
+
+			/* Advance buffer pointer and number of bytes written */
+			buff += len;
+			n_written += len;
+		}
+
+		always_print("EEPROM Write Success!\n");
+		err = SC_ERR_NONE;
+		break;
+
+	default:
+		always_print("Unknown command ID!\n");
+	}
+
+	return err;
 }
 
 /**@}*/
