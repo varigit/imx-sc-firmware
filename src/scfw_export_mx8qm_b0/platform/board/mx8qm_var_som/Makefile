@@ -7,6 +7,7 @@ endif
 
 OBJS += \
 	$(OUT)/board/mx8qm_$(B)/board.o \
+	$(OUT)/board/mx8qm_$(B)/eeprom.o \
 	$(OUT)/board/board_common.o \
 	$(OUT)/board/pmic.o
 
