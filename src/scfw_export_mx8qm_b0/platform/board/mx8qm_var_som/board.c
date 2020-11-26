@@ -77,6 +77,7 @@
 #include "drivers/pad/fsl_pad.h"
 #include "dcd/dcd_retention.h"
 #include "eeprom.h"
+#include "ddr_table.h"
 
 /* Local Defines */
 
@@ -812,7 +813,6 @@ sc_err_t  board_ddr_config(bool rom_caller, board_ddr_action_t action)
             #endif
             break;
         default:
-            /* DDR_00020 */
             board_dcd_config();
             break;
     }
@@ -851,27 +851,24 @@ void board_system_config(sc_bool_t early, sc_rm_pt_t pt_boot)
     board_print(3, "board_system_config(%d, %d)\n", early, alt_config);
 
 #ifndef EMUL
-    if (ddrtest == SC_FALSE)
-    {
-        sc_rm_mr_t mr_temp;
-        sc_faddr_t mr_start;
-        sc_faddr_t dram_size;
+    sc_rm_mr_t mr_temp;
+    sc_faddr_t mr_start;
+    sc_faddr_t dram_size;
 
-        /* Read DRAM size from the EEPROM, use 2GiB if EEPROM is not programmed */
-        if (!var_eeprom_is_valid(&e))
-            dram_size = DEFAULT_DRAM_SIZE;
-        else
-            dram_size = (e.dramsize * 128ULL) << 20;
+    /* Read DRAM size from the EEPROM, use 2GiB if EEPROM is not programmed */
+    if (!var_eeprom_is_valid(&e))
+        dram_size = DEFAULT_DRAM_SIZE;
+    else
+        dram_size = (e.dramsize * 128ULL) << 20;
 
-        /* Fragment upper region and retain (dram_size - LOW_MEM_MAX_DRAM_SIZE) */
-        if (dram_size > LOW_MEM_MAX_DRAM_SIZE)
-            mr_start = HIGH_MEM_START_ADDR + (dram_size - LOW_MEM_MAX_DRAM_SIZE);
-        else
-	    mr_start = HIGH_MEM_START_ADDR;
+    /* Fragment upper region and retain (dram_size - LOW_MEM_MAX_DRAM_SIZE) */
+    if (dram_size > LOW_MEM_MAX_DRAM_SIZE)
+        mr_start = HIGH_MEM_START_ADDR + (dram_size - LOW_MEM_MAX_DRAM_SIZE);
+    else
+	mr_start = HIGH_MEM_START_ADDR;
 
-        BRD_ERR(rm_memreg_frag(pt_boot, &mr_temp, mr_start, HIGH_MEM_END_ADDR));
-        BRD_ERR(rm_memreg_free(pt_boot, mr_temp));
-    }
+    BRD_ERR(rm_memreg_frag(pt_boot, &mr_temp, mr_start, HIGH_MEM_END_ADDR));
+    BRD_ERR(rm_memreg_free(pt_boot, mr_temp));
 #endif
 
     /* Name default partitions */
