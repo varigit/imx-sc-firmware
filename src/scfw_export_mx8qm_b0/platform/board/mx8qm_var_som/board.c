@@ -78,9 +78,38 @@
 #include "eeprom.h"
 #include "ddr_table.h"
 
+/* ------------------------------------------------------------------------------------------------------------------
+ *                               ----- iMX8QM: eDMA limitation USE CASE -----
+ * ------------------------------------------------------------------------------------------------------------------
+ * In the new kernel NXP use the "edma2" in the lpspi driver. The same dma controller is used from M core in FreeRTOS
+ * This generate a conflict and than a kernel crash
+ * ------------------------------------------------------------------------------------------------------------------
+ * To add a clarification regarding eDMA:
+ * - The "edma2" node in the Linux device tree refers to the device at BAR 0x5a1f0000 described in the DMA memory map
+ *   as "eDMA0" (i.MX 8QuadMax reference manual rev.F pp.32)
+ * - DMA0_BASE in imx-sc-firmware/src/scfw_export_mx8qm_b0/platform/devices/MX8QM/MX8QM.h also points to the
+ *   RM's "eDMA0" at 0x5a1f0000.
+ * This confirms the eDMA conflict.
+ *
+ * How to use use eDMA0 in the FreeRTOS:
+ *  - USE_DMA_0 must be defined
+ *  - eDMA0 must be disabled in the Linux device tree overriding the nodes that use "edma2" or disabling the nodes
+ *    that using it
+ * ------------------------------------------------------------------------------------------------------------------
+ * The eDMA conflict affect the below FreeRTOS examples:
+ * - lpspi_edma_b2b_transfer_master.c
+ * - lpspi_edma_b2b_transfer_slave.c
+ * - lpuart_edma_transfer.c
+ * - edma_memory_to_memory.c
+ * - edma_scatter_gather.c
+ * - cmsis_usart_edma_transfer.c
+ * ------------------------------------------------------------------------------------------------------------------
+ */
+
 /* Local Defines */
 
-#undef M40_USES_UART4 /* suggested for VAR-SOM-MX8 only */
+#undef USE_DMA_0	/* Before define USE_DMA_0, read "iMX8QM: eDMA limitation USE CASE" above */
+#undef M40_USES_UART4  /* suggested for VAR-SOM-MX8 only */
 #undef M41_USES_UART2
 #undef M41_USES_SPI0
 #undef M41_USES_I2C0
@@ -88,6 +117,10 @@
 #undef M41_USES_EDMA
 #undef M41_USES_CAN0
 #undef M41_USES_ADC6
+
+#ifndef USE_DMA_0
+    #undef M41_USES_EDMA
+#endif
 
 /*!
  * @name Board Configuration
@@ -931,16 +964,20 @@ void board_system_config(sc_bool_t early, sc_rm_pt_t pt_boot)
         BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_GPT_3,
             SC_R_GPT_3, SC_TRUE));
 #ifdef M41_USES_UART2
+#ifdef USE_DMA_0
         BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_DMA_0_CH16,
             SC_R_DMA_0_CH17, SC_TRUE)); /* DMA0 channels for UART2 */
+#endif
         BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_UART_2,
             SC_R_UART_2, SC_TRUE));
         BRD_ERR(rm_set_pad_movable(pt_boot, SC_P_LVDS0_I2C1_SCL,
             SC_P_LVDS0_I2C1_SDA, SC_TRUE));
 #endif
 #ifdef M41_USES_SPI0
+#ifdef USE_DMA_0
         BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_DMA_0_CH0,
             SC_R_DMA_0_CH1, SC_TRUE)); /* DMA0 channels for SPI0 */
+#endif
         BRD_ERR(rm_set_resource_movable(pt_boot, SC_R_SPI_0,
             SC_R_SPI_0, SC_TRUE));
         BRD_ERR(rm_set_pad_movable(pt_boot, SC_P_SPI0_SCK,
