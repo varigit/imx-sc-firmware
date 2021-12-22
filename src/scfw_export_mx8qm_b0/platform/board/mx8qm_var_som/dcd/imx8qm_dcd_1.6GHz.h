@@ -1,9 +1,7 @@
 #ifndef imx8qm_dcd_1_6GHz_H
 #define imx8qm_dcd_1_6GHz_H
-if (action != BOARD_DDR_COLD_INIT)
-{
- return SC_ERR_NONE;
-}
+DATA4(0xff148000U, 0x00000885U);
+DATA4(0xff1a0000U, 0x00000885U);
 DATA4(0x41a40208U, 0x1U);
 DATA4(0x41d00208U, 0x1U);
 DATA4(0x41a40040U, 0xBU);

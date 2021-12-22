@@ -123,7 +123,7 @@
 #ifdef ALT_DEBUG_SCU_UART
     #define LPUART_DEBUG        LPUART_SC
 #else
-    #define LPUART_DEBUG        LPUART_M4_0
+    #define LPUART_DEBUG        LPUART_MCU_0
 #endif
 
 /*! Configure debug UART instance */
@@ -140,6 +140,12 @@
     /*! Configure debug baud rate */
     #define DEBUG_BAUD          115200U
 #endif
+
+/*!
+ * Define to force power transition of subsytems as workaround for KS1
+ * excess power errata
+ */
+#define BOARD_FORCE_ALL_SS_PWR_TRANS
 
 /* Local Types */
 
