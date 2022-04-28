@@ -77,7 +77,6 @@
 #include "drivers/pad/fsl_pad.h"
 #include "dcd/dcd_retention.h"
 #include "eeprom.h"
-#include "ddr_table.h"
 
 /* Local Defines */
 
