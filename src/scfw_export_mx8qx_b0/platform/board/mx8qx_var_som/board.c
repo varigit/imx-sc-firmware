@@ -3,7 +3,7 @@
 **
 **     Copyright (c) 2016 Freescale Semiconductor, Inc.
 **     Copyright 2017-2020 NXP
-**     Copyright 2018-2020 Variscite Ltd.
+**     Copyright 2018-2022 Variscite Ltd.
 **
 **     Redistribution and use in source and binary forms, with or without modification,
 **     are permitted provided that the following conditions are met:
@@ -1404,6 +1404,7 @@ void board_sec_fault(uint8_t abort_module, uint8_t abort_line,
     #ifdef DEBUG
         error_print("SECO Abort (mod %d, ln %d)\n", abort_module,
             abort_line);
+        ss_irq_trigger(SC_IRQ_GROUP_WAKE, SC_IRQ_SECO_ABORT, SC_PT_ALL);
     #else
         board_fault(SC_FALSE, BOARD_BFAULT_SEC_FAIL, SECO_PT);
     #endif
@@ -1565,6 +1566,13 @@ void SNVS_Button_IRQHandler(void)
 {
     SNVS_ClearButtonIRQ();
 
+    /* Do not enable if SECO unavailable */
+    if (snvs_err != SC_ERR_NONE)
+    {
+        NVIC_DisableIRQ(SNVS_Button_IRQn);
+    }
+
+    /* Notify clients */
     ss_irq_trigger(SC_IRQ_GROUP_WAKE, SC_IRQ_BUTTON, SC_PT_ALL);
 }
 
@@ -1928,6 +1936,14 @@ sc_err_t board_ioctl(sc_rm_pt_t caller_pt, sc_rsrc_t mu, uint32_t *command,
 	}
 
 	return err;
+}
+
+/*--------------------------------------------------------------------------*/
+/* Board custom monitor command                                             */
+/*--------------------------------------------------------------------------*/
+sc_err_t board_monitor_custom(int argc, char *argv[])
+{
+    return SC_ERR_NONE;
 }
 
 /**@}*/
