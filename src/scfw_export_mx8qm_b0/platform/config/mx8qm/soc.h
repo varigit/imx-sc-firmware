@@ -540,13 +540,21 @@ typedef uint32_t sc_db_connect_t;
 #define SC_ROM_FUNC_VER     0x0001U
 
 /*! Defines for AI temp sensor */
+#define FUSE_TEMP_AUTO          0x0
+#define FUSE_TEMP_INDUSL        0x1
 #define AI_TEMP_RATE            1000U
 #define AI_TEMP_NP              1915
 #define AI_TEMP_NT              25
 #define AI_TEMP_PANIC           127
+#define AI_TEMP_PANIC_AUTO      127
+#define AI_TEMP_PANIC_INDUS     107
 #define AI_TEMP_FPU_TS20        133.6f
 #define AI_TEMP_FPU_TS21        -5.39f
 #define AI_TEMP_FPU_TS22        0.002f
+
+/*! Defines for temp grade frequency limit */
+#define INDUSL_MAX_FREQ_AP_0     SC_1104MHZ
+#define INDUSL_MAX_FREQ_AP_1     SC_1300MHZ
 
 /*!
  * Define operating points for A53, A72 and GPU.

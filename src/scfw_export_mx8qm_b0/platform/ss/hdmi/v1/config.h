@@ -2,7 +2,7 @@
 ** ###################################################################
 **
 **     Copyright (c) 2016 Freescale Semiconductor, Inc.
-**     Copyright 2017-2021 NXP
+**     Copyright 2017-2022 NXP
 **
 **     Redistribution and use in source and binary forms, with or without modification,
 **     are permitted provided that the following conditions are met:
@@ -69,6 +69,8 @@
         rsrc_idx, uint32_t ctrl, uint32_t val); \
     sc_err_t ss_get_control_hdmi(sc_sub_t ss, ss_idx_t ss_idx, ss_ridx_t \
         rsrc_idx, uint32_t ctrl, uint32_t *val); \
+    void ss_do_mem_repair_hdmi(sc_sub_t ss, dsc_pdom_t pd, sc_bool_t \
+        enable); \
     void ss_prepost_power_mode_hdmi(sc_sub_t ss, dsc_pdom_t pd, \
         ss_prepost_t type, sc_pm_power_mode_t from_mode, sc_pm_power_mode_t \
         to_mode, sc_bool_t rom_boot); \
@@ -105,7 +107,7 @@
         ss_irq_status_base, \
         ss_irq_trigger_base, \
         ss_dump_base, \
-        ss_do_mem_repair_base, \
+        ss_do_mem_repair_hdmi, \
         ss_updown_base, \
         ss_prepost_power_mode_hdmi, \
         ss_iso_disable_base, \

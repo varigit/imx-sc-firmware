@@ -160,14 +160,14 @@ typedef uint8_t sc_sub_t;
 #define SC_PGP_NA           7U
 
 #define  MTR_PWR_PLAN_SEL_SCU0                  0U
-#define  MTR_PWR_PLAN_SEL_DB                    1U
-#define  MTR_PWR_PLAN_SEL_HSIO                  2U
-#define  MTR_PWR_PLAN_SEL_MCU_0                 3U
-#define  MTR_PWR_PLAN_SEL_LSIO                  4U
-#define  MTR_PWR_PLAN_SEL_CA35                  6U
-#define  MTR_PWR_PLAN_SEL_CONNECTIVITY          7U
-#define  MTR_PWR_PLAN_SEL_DRC_0                 9U
-#define  MTR_PWR_PLAN_SEL_ADMA                  13U
+#define  MTR_PWR_PLAN_SEL_ADMA                  1U
+#define  MTR_PWR_PLAN_SEL_MCU_0                 2U
+#define  MTR_PWR_PLAN_SEL_CONNECTIVITY          3U
+#define  MTR_PWR_PLAN_SEL_DRC_0                 4U
+#define  MTR_PWR_PLAN_SEL_HSIO                  5U
+#define  MTR_PWR_PLAN_SEL_DB                    6U
+#define  MTR_PWR_PLAN_SEL_CA35                  7U
+#define  MTR_PWR_PLAN_SEL_LSIO                  8U
 
 #define SC_SS_INFO_INIT                                                                                 \
     {HAS_SS_SC,      0, SC_PGP_00,   SC_SUBSYS_NA,  0,  0, SC_DSC_SC},          /* SC_SUBSYS_SC */      \
@@ -353,6 +353,8 @@ typedef uint32_t sc_db_connect_t;
 #define MONITOR_HAS_CMD_LOG
 #define MONITOR_HAS_CMD_FIPS_ERRORLOG
 #define MONITOR_HAS_CMD_FIPS_SELFTEST
+#define MONITOR_HAS_CMD_FIPS_DEVICEINFO
+#define MONITOR_HAS_CMD_FIPS_INTEGRITY
 #ifndef EXPORT_MONITOR
 #define MONITOR_HAS_CMD_MRC
 #define MONITOR_HAS_CMD_STAGE
@@ -367,12 +369,12 @@ typedef uint32_t sc_db_connect_t;
 #define HAS_FIPS
 
 /*! Defines for FW versions */
-#define SECO_FW_VERSION ((3UL << 16) | (8UL << 4) | 5UL) 
-#define V2X_FW_VERSION ((1UL << 16) | (1UL << 4) | 4UL) 
+#define SECO_FW_VERSION ((5UL << 16) | (8UL << 4) | 7UL)
+#define V2X_FW_VERSION ((1UL << 16) | (1UL << 4) | 6UL)
 
 /*! Defines for B0 FW versions */
-#define SECO_FW_VERSION_B0 ((3UL << 16) | (8UL << 4) | 6UL) 
-#define V2X_FW_VERSION_B0 ((1UL << 16) | (1UL << 4) | 5UL) 
+#define SECO_FW_VERSION_B0 ((5UL << 16) | (9UL << 4) | 0UL)
+#define V2X_FW_VERSION_B0 ((1UL << 16) | (2UL << 4) | 1UL)
 
 /*! Define DDR DATX8 Lanes */
 #define DWC_NO_OF_BYTES	        2U
@@ -534,15 +536,6 @@ typedef uint32_t sc_db_connect_t;
 #define SOC_MCU_STOPM_PDN       3U                  /* STOPM >= 3 will power down MCU core */
 #define SOC_MCU_STOPM_MEMSR     3U                  /* STOPM == 3 will retain memories */
 #define SOC_SNVS_PWR_ON_WAKEUP  REGBIT64(1, 10)     /* DSC IRQ for SNVS_LP set_pwr_on_irq */
-
-/* Define ADMA mbist */
-#define SS_ADMA_BIST1 (((uint32_t)DSC_ADMA) + 0x8020U)
-#define SS_ADMA_BIST1_START 230U
-#define SS_ADMA_BIST1_END 233U
-
-#define SS_ADMA_BIST3 (((uint32_t)DSC_ADMA) + 0x8040U)
-#define SS_ADMA_BIST3_START 234U
-#define SS_ADMA_BIST3_END 266U
 
 /* Defines for DDR training */
 #define DQS_TIMER_DURATION_512  1U    /* 512 * tCK = 2048 * (1/1200) = 1 us (round up) */

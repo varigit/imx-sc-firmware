@@ -102,6 +102,7 @@ EXPT_TEST += ddr/test_ddr_retention.o \
              misc/test_timers.o \
              sys/test_board.o \
              sys/test_boot.o \
+             sys/test_mtr.o \
              sys/test_partnum.o \
              sys/test_reboot.o \
              sys/test_smmu.o \
