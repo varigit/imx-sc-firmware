@@ -77,6 +77,7 @@
 #include "drivers/pad/fsl_pad.h"
 #include "dcd/dcd_retention.h"
 #include "eeprom.h"
+#include "ddr_table.h"
 
 /* Local Defines */
 
@@ -297,19 +298,59 @@ LPUART_Type *board_get_debug_uart(uint8_t *inst, uint32_t *baud)
 /*--------------------------------------------------------------------------*/
 void board_config_debug_uart(sc_bool_t early_phase)
 {
-    #if !defined(DEBUG_TERM_EMUL) && defined(DEBUG) && !defined(SIMU)
+    #if defined(ALT_DEBUG_SCU_UART) && !defined(DEBUG_TERM_EMUL) \
+            && defined(DEBUG) && !defined(SIMU)
         /* Power up UART */
         pm_force_resource_power_mode_v(SC_R_SC_UART,
             SC_PM_PW_MODE_ON);
 
-        /* Return if debug enabled */
-        ASRT(SCFW_DBG_READY == 0U);
+        /* Check if debug disabled */
+        if (SCFW_DBG_READY == 0U)
+        {
+            main_config_debug_uart(LPUART_DEBUG, SC_24MHZ);
+        }
+    #elif defined(ALT_DEBUG_UART) && defined(DEBUG) && !defined(SIMU)
+        /* Use M4 UART if ALT_DEBUG_UART defined */
+        /* Return if debug already enabled */
+        if ((SCFW_DBG_READY == 0U) && (early_phase == SC_FALSE))
+        {
+            sc_pm_clock_rate_t rate = SC_24MHZ;
+            static sc_bool_t banner = SC_FALSE;
 
-        /* Configure SCU UART */
-        main_config_debug_uart(LPUART_DEBUG, SC_24MHZ);
+            /* Configure pads */
+            pad_force_mux(SC_P_M40_I2C0_SDA, 1,
+                SC_PAD_CONFIG_NORMAL, SC_PAD_ISO_OFF);
+            pad_force_mux(SC_P_M40_I2C0_SCL, 1,
+                SC_PAD_CONFIG_NORMAL, SC_PAD_ISO_OFF);
+
+            /* Power and enable clock */
+            pm_force_resource_power_mode_v(SC_R_SC_PID0,
+                SC_PM_PW_MODE_ON);
+            pm_force_resource_power_mode_v(SC_R_DBLOGIC,
+                SC_PM_PW_MODE_ON);
+            pm_force_resource_power_mode_v(SC_R_DB, SC_PM_PW_MODE_ON);
+            pm_force_resource_power_mode_v(SC_R_M4_0_UART,
+                SC_PM_PW_MODE_ON);
+            (void) pm_set_clock_rate(SC_PT, SC_R_M4_0_UART, SC_PM_CLK_PER,
+                &rate);
+            (void) pm_clock_enable(SC_PT, SC_R_M4_0_UART, SC_PM_CLK_PER,
+                SC_TRUE, SC_FALSE);
+
+            /* Configure UART */
+            main_config_debug_uart(LPUART_DEBUG, rate);
+
+            if (banner == SC_FALSE)
+            {
+                debug_print(1,
+                    "\nHello from SCU (Build %u, Commit %08x, %s %s)\n\n",
+                    SCFW_BUILD, SCFW_COMMIT, SCFW_DATE, SCFW_TIME);
+                banner = SC_TRUE;
+            }
+        }
     #elif defined(DEBUG_TERM_EMUL) && defined(DEBUG) && !defined(SIMU)
         *SCFW_DBG_TX_PTR = 0U;
         *SCFW_DBG_RX_PTR = 0U;
+        /* Set to 2 for JTAG emulation */
         SCFW_DBG_READY = 2U;
     #endif
 }
@@ -332,12 +373,24 @@ void board_config_sc(sc_rm_pt_t pt_sc)
      * the board code to run should be kept here. This is done by marking
      * them as not movable.
      */
+    #ifdef ALT_DEBUG_UART
+        (void) rm_set_resource_movable(SC_PT, SC_R_M4_0_UART, SC_R_M4_0_UART,
+            SC_FALSE);
+        (void) rm_set_pad_movable(SC_PT, SC_P_M40_I2C0_SCL, SC_P_M40_I2C0_SDA,
+            SC_FALSE);
+    #endif
+
     (void) rm_set_resource_movable(pt_sc, SC_R_SC_I2C, SC_R_SC_I2C,
         SC_FALSE);
     (void) rm_set_pad_movable(pt_sc, SC_P_PMIC_I2C_SDA, SC_P_PMIC_I2C_SCL,
         SC_FALSE);
-    (void) rm_set_pad_movable(pt_sc, SC_P_SCU_GPIO0_02, SC_P_SCU_GPIO0_07,
-        SC_TRUE);
+    #ifdef ALT_DEBUG_SCU_UART
+        (void) rm_set_pad_movable(pt_sc, SC_P_SCU_GPIO0_00,
+            SC_P_SCU_GPIO0_02, SC_FALSE);
+    #else
+        (void) rm_set_pad_movable(pt_sc, SC_P_SCU_GPIO0_01,
+            SC_P_SCU_GPIO0_02, SC_FALSE);
+    #endif
 }
 
 /*--------------------------------------------------------------------------*/
