@@ -100,6 +100,13 @@
 /** @} */
 
 /*!
+ * @name Defines for setpoints
+ */
+/** @{ */
+#define SECO_SETPOINT_V2X_OVD       BIT8(0)    /*!< V2X in overdrive */
+/** @} */
+
+/*!
  * @name Defines for V2X state
  */
 /** @{ */
@@ -318,6 +325,18 @@ void SECO_CAAM_Config_TD(uint16_t jr, sc_bool_t allow, sc_bool_t lock);
 void SECO_ClearCache(void);
 
 /*!
+ * This function notifies SECO of an MU power off.
+ *
+ * @param[in]     mu          index of MU
+ * @param[in]     forced      1=release resources
+ *
+ * Called by the Resource Manager to tell SECO MU is being powered off.
+ *
+ * See the SECO API Reference Guide for more info.
+ */
+void SECO_MU_PowerDown(uint8_t mu, uint8_t forced);
+
+/*!
  * This function configures MU ownership.
  *
  * @param[in]     mu          Index of MU
@@ -432,6 +451,17 @@ void SECO_EnterLPM(void);
  * See the SECO API Reference Guide for more info.
  */
 void SECO_ExitLPM(void);
+
+
+/*!
+ * This function provides information regarding the operational
+ * environment of the device.
+ *
+ * @param[in]     setpoint    setpoint flags
+ *
+ * See the SECO API Reference Guide for more info.
+ */
+void SECO_UpdateSetpoint(uint8_t setpoint);
 
 /** @} */
 
@@ -777,8 +807,6 @@ void SECO_FIPS_KeyZero(sc_faddr_t addr);
  * @param[out]    payload     address to return the abort payload
  * @param[out]    bitmap      address to reutrn the self-test bitmap
  *
-
-
  * See the SECO API Reference Guide for more info.
  */
 void SECO_FIPS_Errorlog(uint32_t *payload, uint32_t *bitmap);
@@ -808,6 +836,44 @@ void SECO_FIPS_Errorlog(uint32_t *payload, uint32_t *bitmap);
  * See the SECO API Reference Guide for more info.
  */
 void SECO_FIPS_Selftests(uint8_t flags, uint32_t bitmap);
+
+/*!
+ * This function is used to retrieve information regarding the device, firmware and
+ * configuration. It is specifically targeted to identify whether the device is in a
+ * FIPS certified configuration.
+ *
+ * @param[out]    info_block  address to reutrn the info block
+ *
+ * See the SECO API Reference Guide for more info.
+ */
+void SECO_FIPS_DeviceInfo(uint32_t *info_block);
+
+/*!
+ * This function can be called after SECO FW download to verify that the downloaded
+ * FW is correct (hash of FW image matches hash when FW was authenticated). In case
+ * of error in FW image integrity, the SECO enters the abort state.
+ *
+ * @param[in]     target      flags to inidicate target core(s)
+ *
+ * Targets:
+ *  
+ *  Bit 0 - SECO
+ *  -   0 = Do not run integrity test on SECO FW
+ *  -   1 = Run integrity test in SECO FW
+ *
+ *  Bit 1 - V2X Primary core
+ *  -   0 = Do not run integrity test on V2X Primary core FW
+ *  -   1 = Run integrity test on V2X Primary core FW
+ *
+ *  Bit 2 - V2X Secondary core
+ *  -   0 = Do not run integrity test on V2X Secondary core FW
+ *  -   1 = Run integrity test on V2X Secondary core FW
+ *
+ *  Bit 3 - 7: Reserved, must be set to 0
+ *
+ * See the SECO API Reference Guide for more info.
+ */
+void SECO_FIPS_IntegrityTest(uint8_t target);
 
 /** @} */
 

@@ -910,6 +910,13 @@ sc_bool_t soc_is_v2x_fips_cert(void);
 sc_bool_t soc_is_v2x_fips_mode(void);
 #endif
 
+/*!
+ * This function returns the required SECO version.
+ *
+ * @return Returns the required SECO version based on SoC version.
+ */
+uint32_t soc_get_req_seco_version(void);
+
 /** @} */
 
 /*!

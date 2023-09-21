@@ -194,8 +194,8 @@ typedef uint8_t sc_sub_t;
 #define  MTR_PWR_PLAN_SEL_MIPI_CSI_0            11U
 #define  MTR_PWR_PLAN_SEL_IMAGING               12U
 #define  MTR_PWR_PLAN_SEL_ADMA                  13U
-#define  MTR_PWR_PLAN_SEL_DI_MIPI_DSI_LVDS_0    14U
-#define  MTR_PWR_PLAN_SEL_DI_MIPI_DSI_LVDS_1    15U
+#define  MTR_PWR_PLAN_SEL_DI_MIPI_DSI_LVDS_1    14U
+#define  MTR_PWR_PLAN_SEL_DI_MIPI_DSI_LVDS_0    15U
 
 #define SC_SS_INFO_INIT                                                                                 \
     {HAS_SS_SC,      0, SC_PGP_00,   SC_SUBSYS_NA,  0,  0, SC_DSC_SC},          /* SC_SUBSYS_SC */      \
@@ -329,6 +329,7 @@ typedef uint32_t sc_db_connect_t;
 /*! Chip versions */
 #define CHIP_VER_B0     0x1U
 #define CHIP_VER_C0     0x2U
+#define MTR_OFFSET_C0   4U
 
 /*! Macro to get JTAG ID */
 #ifndef SIMU
@@ -592,15 +593,6 @@ typedef uint32_t sc_db_connect_t;
 #define SOC_MCU_STOPM_PDN       3U                  /* STOPM >= 3 will power down MCU core */
 #define SOC_MCU_STOPM_MEMSR     3U                  /* STOPM == 3 will retain memories */
 #define SOC_SNVS_PWR_ON_WAKEUP  REGBIT64(1, 10)     /* DSC IRQ for SNVS_LP set_pwr_on_irq */
-
-/* Define ADMA mbist */
-#define SS_ADMA_BIST1 (((uint32_t)DSC_ADMA) + 0x8020U)
-#define SS_ADMA_BIST1_START 230U
-#define SS_ADMA_BIST1_END 233U
-
-#define SS_ADMA_BIST3 (((uint32_t)DSC_ADMA) + 0x8040U)
-#define SS_ADMA_BIST3_START 234U
-#define SS_ADMA_BIST3_END 266U
 
 /* Defines for DDR training */
 #define DQS_TIMER_DURATION_512  1U    /* 512 * tCK = 2048 * (1/1200) = 1 us (round up) */

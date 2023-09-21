@@ -2,7 +2,7 @@
 ** ###################################################################
 **
 **     Copyright (c) 2016 Freescale Semiconductor, Inc.
-**     Copyright 2017-2021 NXP
+**     Copyright 2017-2022 NXP
 **
 **     Redistribution and use in source and binary forms, with or without modification,
 **     are permitted provided that the following conditions are met:
@@ -58,6 +58,9 @@
 /*! Define used to create subsystem function prototypes */
 #define SS_FUNC_PROTO_SC \
     void ss_init_sc(sc_sub_t ss, sc_bool_t api_phase); \
+    void ss_trans_power_mode_sc(sc_sub_t ss, ss_idx_t ss_idx, ss_ridx_t \
+        rsrc_idx, sc_pm_power_mode_t from_mode, sc_pm_power_mode_t \
+        to_mode); \
     void ss_rdc_enable_sc(sc_sub_t ss, sc_bool_t master); \
     void ss_rdc_set_master_sc(sc_sub_t ss, ss_idx_t ss_idx, ss_ridx_t \
         rsrc_idx, sc_bool_t valid, sc_bool_t lock, sc_rm_spa_t sa, \
@@ -79,7 +82,7 @@
 #define SS_EP_INIT_SC \
     { \
         ss_init_sc, \
-        ss_trans_power_mode_base, \
+        ss_trans_power_mode_sc, \
         ss_rsrc_reset_base, \
         ss_set_cpu_power_mode_base, \
         ss_set_cpu_resume_base, \
