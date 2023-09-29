@@ -384,13 +384,8 @@ void board_config_sc(sc_rm_pt_t pt_sc)
         SC_FALSE);
     (void) rm_set_pad_movable(pt_sc, SC_P_PMIC_I2C_SDA, SC_P_PMIC_I2C_SCL,
         SC_FALSE);
-    #ifdef ALT_DEBUG_SCU_UART
-        (void) rm_set_pad_movable(pt_sc, SC_P_SCU_GPIO0_00,
-            SC_P_SCU_GPIO0_02, SC_FALSE);
-    #else
-        (void) rm_set_pad_movable(pt_sc, SC_P_SCU_GPIO0_01,
-            SC_P_SCU_GPIO0_02, SC_FALSE);
-    #endif
+    (void) rm_set_pad_movable(pt_sc, SC_P_SCU_GPIO0_02, SC_P_SCU_GPIO0_07,
+        SC_TRUE);
 }
 
 /*--------------------------------------------------------------------------*/
